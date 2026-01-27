@@ -1,6 +1,9 @@
 ﻿using Aureum.Pass.Data;
 using Aureum.Pass.DTOs;
+using Aureum.Pass.Models;
 using Aureum.Pass.Profiles;
+using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aureum.Pass.Controllers
@@ -10,18 +13,29 @@ namespace Aureum.Pass.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AuthContext _context;
-        private readonly AuthProfile _mapper;
+        private readonly IMapper _mapper;
+        private readonly UserManager<AuthUser> _userManager;
 
-        public AuthController(AuthContext context, AuthProfile mapper)
+        public AuthController(AuthContext context, IMapper mapper, UserManager<AuthUser> userManager)
         {
             this._context = context;
             this._mapper = mapper;
+            this._userManager = userManager;
         }
 
         [HttpPost]
-        public ActionResult<ReadAuthDTO> Post([FromBody] CreateUserDTO createUserDTO)
+        public async Task<ActionResult<ReadAuthDTO>> Post([FromBody] CreateUserDTO createUserDTO)
         {
-            throw new NotImplementedException();
+            AuthUser authUser = this._mapper.Map<AuthUser>(createUserDTO);
+
+            IdentityResult result = await _userManager.CreateAsync(authUser, createUserDTO.Password);
+
+            if (result.Succeeded)
+            {
+                var dtoRead = _mapper.Map<ReadAuthDTO>(authUser);
+                return CreatedAtAction(nameof(GetById), new { id = authUser.Id }, dtoRead);
+            }
+            return BadRequest(result.Errors);
         }
 
         [HttpGet]
@@ -33,7 +47,7 @@ namespace Aureum.Pass.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<ReadAuthDTO> GetById(long id)
+        public ActionResult<ReadAuthDTO> GetById(string id)
         {
             throw new NotImplementedException();
         }

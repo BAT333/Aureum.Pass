@@ -12,7 +12,7 @@ namespace Aureum.Pass.DTOs
         public string Password { get; init; }
 
         [Required]
-        [Compare("password")]
+        [Compare("Password")]
         public string RePassword { get; init; }
 
 

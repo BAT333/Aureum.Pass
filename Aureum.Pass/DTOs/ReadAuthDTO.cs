@@ -2,7 +2,7 @@
 {
     public record ReadAuthDTO
     {
-        public long Id { get; init; }
+        public string Id { get; init; }
         public string UserName { get; init; }
     }
 }
